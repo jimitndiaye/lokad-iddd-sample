@@ -4,6 +4,10 @@ using System.IO;
 
 namespace lokad_iddd_sample
 {
+    /// <summary>
+    /// TODO: import proper append-only event store from Lokad, when
+    /// it is ready
+    /// </summary>
     public sealed class FileEventStore : IEventStore
     {
         readonly IEventStoreStrategy _strategy;
@@ -13,8 +17,6 @@ namespace lokad_iddd_sample
         {
             _strategy = strategy;
             _folder = folder;
-
-            
         }
 
         public EventStream LoadEventStream(IIdentity id)
@@ -55,12 +57,6 @@ namespace lokad_iddd_sample
             var size = BitConverter.ToInt32(sizeBuffer, 0);
             return size;
         }
-
-        public EventStream LoadEventStreamAfterVersion(IIdentity id, int version)
-        {
-            throw new NotImplementedException();
-        }
-
         public void AppendToStream(IIdentity id, int expectedVersion, ICollection<IEvent> events)
         {
             var fileName = _strategy.IdentityToString(id);

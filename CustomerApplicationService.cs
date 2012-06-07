@@ -28,7 +28,6 @@ namespace lokad_iddd_sample
         {
             Update(c.Id, a=> a.Rename(c.NewName));
         }
-
     }
 
     public class Customer
@@ -62,7 +61,7 @@ namespace lokad_iddd_sample
         {
             if (_state.Name == name)
                 return;
-            Apply(new CustomerRenamed()
+            Apply(new CustomerRenamed
                 {
                     Name = name
                 });

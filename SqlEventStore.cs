@@ -36,10 +36,11 @@ namespace lokad_iddd_sample
                 const string txt =
                     @"IF NOT EXISTS 
                         (SELECT * FROM sys.objects 
-                            WHERE object_id = OBJECT_ID(N'[dbo].[ES_Events]') 
+                            WHERE object_id = OBJECT_ID(N'[dbo].[Events]') 
                             AND type in (N'U'))
 
-                        CREATE TABLE [dbo].[ES_Events](
+                        CREATE TABLE [dbo].[Events](
+                            [Id] [int] PRIMARY KEY IDENTITY,
 	                        [Name] [nvarchar](50) NOT NULL,
 	                        [Version] [int] NOT NULL,
 	                        [Data] [varbinary](max) NOT NULL
@@ -59,7 +60,7 @@ namespace lokad_iddd_sample
             {
                 conn.Open();
                 const string sql =
-                    @"SELECT Data, Version FROM ES_Events
+                    @"SELECT Data, Version FROM Events
                         WHERE Name = @p1
                         ORDER BY Version";
                 using (var cmd = new SqlCommand(sql, conn))
@@ -82,11 +83,6 @@ namespace lokad_iddd_sample
             }
         }
 
-        public EventStream LoadEventStreamAfterVersion(IIdentity id, int version)
-        {
-            throw new NotImplementedException();
-        }
-
         public void AppendToStream(IIdentity id, int expectedVersion, ICollection<IEvent> events)
         {
             var name = _strategy.IdentityToString(id);
@@ -97,7 +93,7 @@ namespace lokad_iddd_sample
                 {
                     const string sql =
                         @"SELECT ISNULL(MAX(Version),0) 
-                            FROM ES_Events 
+                            FROM Events 
                             WHERE Name=@name";
 
                     using (var cmd = new SqlCommand(sql, conn, tx))
@@ -113,7 +109,7 @@ namespace lokad_iddd_sample
                     foreach (var @event in events)
                     {
                         const string txt =
-                            @"INSERT INTO ES_Events (Name,Version,Data) 
+                            @"INSERT INTO Events (Name,Version,Data) 
                                 VALUES(@name,@version,@data)";
 
                         using (var cmd = new SqlCommand(txt, conn, tx))

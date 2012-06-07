@@ -14,10 +14,7 @@ namespace lokad_iddd_sample
     public interface IEventStore
     {
         EventStream LoadEventStream(IIdentity id);
-        EventStream LoadEventStreamAfterVersion(IIdentity id, int version);
-
-        void AppendToStream(IIdentity id, int expectedVersion,
-            ICollection<IEvent> events);
+        void AppendToStream(IIdentity id, int expectedVersion, ICollection<IEvent> events);
     }
 
     public class EventStream
