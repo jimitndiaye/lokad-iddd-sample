@@ -14,7 +14,7 @@ namespace lokad_iddd_sample
 
         void Update(CustomerId id, Action<Customer> execute)
         {
-            EventStream eventStream = _eventStore.LoadEventStream(id);
+            EventStream eventStream = _eventStore.LoadEventStream(id,0, int.MaxValue);
             Customer customer = new Customer(eventStream.Events);
             execute(customer);
             _eventStore.AppendToStream(id, eventStream.Version, customer.Changes);

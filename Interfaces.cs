@@ -13,7 +13,7 @@ namespace lokad_iddd_sample
 {
     public interface IEventStore
     {
-        EventStream LoadEventStream(IIdentity id);
+        EventStream LoadEventStream(IIdentity id, int skip, int take);
         void AppendToStream(IIdentity id, int expectedVersion, ICollection<IEvent> events);
     }
 
@@ -23,11 +23,6 @@ namespace lokad_iddd_sample
         public int Version;
         // all events in the stream
         public IList<IEvent> Events = new List<IEvent>();
-
-        public static readonly EventStream Empty = new EventStream
-            {
-                Events = new List<IEvent>()
-            };
     }
 
     public interface IEvent {}
@@ -38,8 +33,11 @@ namespace lokad_iddd_sample
 
     public interface IEventStoreStrategy
     {
+        // will serialize an event into array of bytes
         byte[] SerializeEvent(IEvent e);
+        // deserializes event from an array of bytes
         IEvent DeserializeEvent(byte[] data);
+        // converts identity into string identifier
         string IdentityToString(IIdentity id);
     }
 

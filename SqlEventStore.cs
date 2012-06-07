@@ -44,7 +44,8 @@ namespace lokad_iddd_sample
 	                        [Name] [nvarchar](50) NOT NULL,
 	                        [Version] [int] NOT NULL,
 	                        [Data] [varbinary](max) NOT NULL
-                        ) ON [PRIMARY]";
+                        ) ON [PRIMARY]
+";
                 using (var cmd = new SqlCommand(txt,conn))
                 {
                     cmd.ExecuteNonQuery();
@@ -52,7 +53,7 @@ namespace lokad_iddd_sample
             }
         }
 
-        public EventStream LoadEventStream(IIdentity id)
+        public EventStream LoadEventStream(IIdentity id, int skip, int take)
         {
             var name = _strategy.IdentityToString(id);
 
@@ -60,12 +61,14 @@ namespace lokad_iddd_sample
             {
                 conn.Open();
                 const string sql =
-                    @"SELECT Data, Version FROM Events
-                        WHERE Name = @p1
+                    @"SELECT TOP (@take) Data, Version FROM Events
+                        WHERE Name = @p1 AND Version > @skip
                         ORDER BY Version";
                 using (var cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("p1", name);
+                    cmd.Parameters.AddWithValue("@p1", name);
+                    cmd.Parameters.AddWithValue("@take", take);
+                    cmd.Parameters.AddWithValue("@skip", skip);
                     var stream = new EventStream();
                     var version = 0;
                     using (var reader = cmd.ExecuteReader())
@@ -74,7 +77,8 @@ namespace lokad_iddd_sample
                         {
                             var data = (byte[]) reader["Data"];
                             version = (int) reader["Version"];
-                            stream.Events.Add(_strategy.DeserializeEvent(data));
+                            var @event = _strategy.DeserializeEvent(data);
+                            stream.Events.Add(@event);
                         }
                     }
                     stream.Version = version;

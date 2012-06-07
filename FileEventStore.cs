@@ -19,28 +19,35 @@ namespace lokad_iddd_sample
             _folder = folder;
         }
 
-        public EventStream LoadEventStream(IIdentity id)
+        public EventStream LoadEventStream(IIdentity id, int skip, int take)
         {
             var fileName = _strategy.IdentityToString(id);
             var path = Path.Combine(_folder, fileName);
 
+            var stream = new EventStream();
             if (!File.Exists(path))
-                return EventStream.Empty;
-            var events = new List<IEvent>();
+                return stream;
+
+            int position = 0;
+            
             using(var file = File.OpenRead(path))
             {
                 while (file.Position < file.Length)
                 {
                     var size = ReadInt32(file);
                     var data = ReadBytes(file, size);
-                    events.Add(_strategy.DeserializeEvent(data));
+
+                    position += 1;
+
+                    if ((position > skip) && (position <= skip + take))
+                    {
+                        stream.Events.Add(_strategy.DeserializeEvent(data));
+                    }
+                    
+                    stream.Version += 1;
                 }
             }
-            return new EventStream
-                {
-                    Events = events,
-                    Version = events.Count
-                };
+            return stream;
         }
 
         static byte[] ReadBytes(FileStream file, int size)
