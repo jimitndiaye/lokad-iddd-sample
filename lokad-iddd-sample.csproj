@@ -34,6 +34,9 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="mysql.data">
+      <HintPath>Library\mysql\mysql.data.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,6 +49,7 @@
     <Compile Include="CustomerApplicationService.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="FileEventStore.cs" />
+    <Compile Include="MySqlEventStore.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="SampleStrategy.cs" />
     <Compile Include="SqlEventStore.cs" />
