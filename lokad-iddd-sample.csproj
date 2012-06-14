@@ -47,13 +47,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomerApplicationService.cs" />
+    <Compile Include="domain\Customer.cs" />
+    <Compile Include="domain\CustomerApplicationService.cs" />
+    <Compile Include="domain\CustomerState.cs" />
     <Compile Include="Interfaces.cs" />
-    <Compile Include="FileEventStore.cs" />
-    <Compile Include="MySqlEventStore.cs" />
+    <Compile Include="infrastructure\FileEventStore.cs" />
+    <Compile Include="infrastructure\MySqlEventStore.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="SampleStrategy.cs" />
-    <Compile Include="SqlEventStore.cs" />
+    <Compile Include="infrastructure\SampleStrategy.cs" />
+    <Compile Include="infrastructure\SqlEventStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
