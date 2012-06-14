@@ -20,14 +20,15 @@ namespace lokad_iddd_sample
         }
 
 
-        public void Create(string name)
+        public void Create(CustomerId id, string name)
         {
             if (_state.Created)
                 throw new InvalidOperationException("Customer was already created");
             Apply(new CustomerCreated()
                 {
                     Created = DateTime.UtcNow,
-                    Name = name
+                    Name = name,
+                    Id = id
                 });
         }
         public void Rename(string name)
@@ -36,7 +37,10 @@ namespace lokad_iddd_sample
                 return;
             Apply(new CustomerRenamed
                 {
-                    Name = name
+                    Name = name,
+                    Id = _state.Id,
+                    OldName = _state.Name,
+                    Renamed = DateTime.UtcNow
                 });
         }
     }

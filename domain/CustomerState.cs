@@ -7,6 +7,7 @@ namespace lokad_iddd_sample
 
         public string Name { get; private set; }
         public bool Created { get; private set; }
+        public CustomerId Id { get; private set; }
         public CustomerState(IEnumerable<IEvent> events)
         {
             foreach (var e in events)
@@ -19,6 +20,7 @@ namespace lokad_iddd_sample
         {
             Created = true;
             Name = e.Name;
+            Id = e.Id;
         }
 
         public void When(CustomerRenamed e)

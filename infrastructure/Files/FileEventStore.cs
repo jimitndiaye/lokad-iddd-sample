@@ -142,6 +142,11 @@ namespace lokad_iddd_sample
             _info = info;
         }
 
+        public FileAppendOnlyStore(string path)
+        {
+            _info = new DirectoryInfo(path);
+        }
+
         public void Append(string key, byte[] buffer, int serverVersion = -1)
         {
             // should be locked

@@ -21,7 +21,7 @@ namespace lokad_iddd_sample
 
         public void When(CreateCustomer c)
         {
-            Update(c.Id, a => a.Create(c.Name));
+            Update(c.Id, a => a.Create(c.Id,c.Name));
         }
         public void When(RenameCustomer c)
         {
