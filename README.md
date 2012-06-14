@@ -1,5 +1,5 @@
-Sample code for IDDD Book
-=====================================
+DRAFT! sample code for IDDD Book 
+===============================
 
 
 This is .NET Sample Project to accompany Event Sourcing materials from IDDD Book by [Vaughn Vernon](http://vaughnvernon.co/).
