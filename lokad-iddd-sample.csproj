@@ -51,10 +51,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="domain\Contracts.cs" />
     <Compile Include="domain\Customer.cs" />
     <Compile Include="domain\CustomerApplicationService.cs" />
     <Compile Include="domain\CustomerState.cs" />
     <Compile Include="infrastructure\AppendOnlyStream.cs" />
+    <Compile Include="infrastructure\Azure\AutoRenewLease.cs" />
     <Compile Include="infrastructure\Azure\BlobAppendOnlyStore.cs" />
     <Compile Include="infrastructure\EventStore.cs" />
     <Compile Include="Interfaces.cs" />
