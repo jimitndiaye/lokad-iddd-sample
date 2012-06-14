@@ -11,6 +11,64 @@ using System.Runtime.Serialization;
 
 namespace lokad_iddd_sample
 {
+
+    public interface IAppendOnlyStore : IDisposable
+    {
+        void Append(string key, byte[] buffer, int serverVersion = -1);
+        IEnumerable<TapeRecord> ReadRecords(string key, int afterVersion, int maxCount);
+        IEnumerable<AppendRecord> ReadRecords(int afterVersion, int maxCount);
+
+        void Close();
+    }
+
+    public sealed class TapeRecord
+    {
+        public readonly int Version;
+        public readonly byte[] Data;
+
+        public TapeRecord(int version, byte[] data)
+        {
+            Version = version;
+            Data = data;
+        }
+    }
+    public sealed class AppendRecord
+    {
+        public readonly string Name;
+        public readonly byte[] Data;
+
+        public AppendRecord(string name, byte[] data)
+        {
+            Name = name;
+            Data = data;
+        }
+    }
+
+    /// <summary>
+    /// Is thrown internally, when storage version does not match the condition specified in <see cref="TapeAppendCondition"/>
+    /// </summary>
+    [Serializable]
+    public class AppendOnlyStoreConcurrencyException : Exception
+    {
+        public AppendOnlyStoreConcurrencyException() { }
+        public AppendOnlyStoreConcurrencyException(string message) : base(message) { }
+        public AppendOnlyStoreConcurrencyException(string message, Exception inner) : base(message, inner) { }
+
+        protected AppendOnlyStoreConcurrencyException(
+            SerializationInfo info,
+            StreamingContext context)
+            : base(info, context) { }
+
+        public AppendOnlyStoreConcurrencyException(int expectedVersion, int actualVersion, string name)
+            : base(
+                string.Format("Expected version {0} in stream '{1}' but got {2}", expectedVersion, name, actualVersion))
+        {
+
+        }
+    }
+
+
+
     public interface IEventStore
     {
         EventStream LoadEventStream(IIdentity id, int skip, int take);
@@ -22,7 +80,7 @@ namespace lokad_iddd_sample
         // version of the event stream returned
         public int Version;
         // all events in the stream
-        public IList<IEvent> Events = new List<IEvent>();
+        public List<IEvent> Events = new List<IEvent>();
     }
 
     public interface IEvent {}
@@ -34,9 +92,9 @@ namespace lokad_iddd_sample
     public interface IEventStoreStrategy
     {
         // will serialize an event into array of bytes
-        byte[] SerializeEvent(IEvent e);
+        byte[] SerializeEvent(IEvent[] e);
         // deserializes event from an array of bytes
-        IEvent DeserializeEvent(byte[] data);
+        IEvent[] DeserializeEvent(byte[] data);
         // converts identity into string identifier
         string IdentityToString(IIdentity id);
     }

@@ -9,12 +9,13 @@ namespace lokad_iddd_sample
         public static void Main()
         {
             var conn = "Data Source=.\\SQLExpress;Initial Catalog=lokadsalescast_samples;Integrated Security=true";
-            var store = new SqlEventStore(conn, new SampleStrategy());
+            var store = new SqlAppendOnlyStore(conn);
+            var events = new EventStore(store, new SampleStrategy());
             //var store = new FileEventStore(new SampleStrategy(), "temp");
             store.Initialize();
 
             var server = new Server();
-            server.Handlers.Add(new CustomerApplicationService(store));
+            server.Handlers.Add(new CustomerApplicationService(events));
 
             server.Dispatch(new CreateCustomer { Id = new CustomerId(12), Name = "Lokad"});
             server.Dispatch(new RenameCustomer { Id = new CustomerId(12), NewName = "Lokad SAS"});

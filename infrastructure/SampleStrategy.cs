@@ -6,7 +6,7 @@ namespace lokad_iddd_sample
     public sealed class SampleStrategy : IEventStoreStrategy
     {
         readonly BinaryFormatter _formatter = new BinaryFormatter();
-        public byte[] SerializeEvent(IEvent e)
+        public byte[] SerializeEvent(IEvent[] e)
         {
             using (var mem = new MemoryStream())
             {
@@ -15,11 +15,11 @@ namespace lokad_iddd_sample
             }
         }
 
-        public IEvent DeserializeEvent(byte[] data)
+        public IEvent[] DeserializeEvent(byte[] data)
         {
             using (var mem = new MemoryStream(data))
             {
-                return (IEvent) _formatter.Deserialize(mem);
+                return (IEvent[]) _formatter.Deserialize(mem);
             }
         }
 
