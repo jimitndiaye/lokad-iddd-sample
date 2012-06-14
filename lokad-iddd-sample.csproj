@@ -61,7 +61,6 @@
     <Compile Include="infrastructure\Files\FileEventStore.cs" />
     <Compile Include="infrastructure\mySql\MySqlEventStore.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="infrastructure\SampleStrategy.cs" />
     <Compile Include="infrastructure\MsSql\SqlEventStore.cs" />
   </ItemGroup>
   <ItemGroup>

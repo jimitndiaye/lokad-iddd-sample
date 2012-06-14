@@ -10,7 +10,7 @@ namespace lokad_iddd_sample
         {
             var conn = "Data Source=.\\SQLExpress;Initial Catalog=lokadsalescast_samples;Integrated Security=true";
             var store = new SqlAppendOnlyStore(conn);
-            var events = new EventStore(store, new SampleStrategy());
+            var events = new EventStore(store);
             //var store = new FileEventStore(new SampleStrategy(), "temp");
             store.Initialize();
 

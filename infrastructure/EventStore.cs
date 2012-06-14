@@ -2,29 +2,51 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace lokad_iddd_sample
 {
     public sealed class EventStore : IEventStore
     {
-        public EventStore(IAppendOnlyStore factory, IEventStoreStrategy strategy)
+        public EventStore(IAppendOnlyStore factory)
         {
             _factory = factory;
-            _strategy = strategy;
         }
 
         readonly IAppendOnlyStore _factory;
-        readonly IEventStoreStrategy _strategy;
+
+        readonly BinaryFormatter _formatter = new BinaryFormatter();
+        byte[] SerializeEvent(IEvent[] e)
+        {
+            using (var mem = new MemoryStream())
+            {
+                _formatter.Serialize(mem, e);
+                return mem.ToArray();
+            }
+        }
+
+        IEvent[] DeserializeEvent(byte[] data)
+        {
+            using (var mem = new MemoryStream(data))
+            {
+                return (IEvent[])_formatter.Deserialize(mem);
+            }
+        }
+
+        string IdentityToString(IIdentity id)
+        {
+            return id.ToString();
+        }
 
         public EventStream LoadEventStream(IIdentity id, int skip, int take)
         {
-            var name = _strategy.IdentityToString(id);
+            var name = IdentityToString(id);
             var records = _factory.ReadRecords(name, skip, take).ToList();
             var stream = new EventStream();
 
             foreach (var tapeRecord in records)
             {
-                stream.Events.AddRange(_strategy.DeserializeEvent(tapeRecord.Data));
+                stream.Events.AddRange(DeserializeEvent(tapeRecord.Data));
                 stream.Version = tapeRecord.Version;
             }
             return stream;
@@ -34,8 +56,8 @@ namespace lokad_iddd_sample
         {
             if (events.Count == 0)
                 return;
-            var name = _strategy.IdentityToString(id);
-            var data = _strategy.SerializeEvent(events.ToArray());
+            var name = IdentityToString(id);
+            var data = SerializeEvent(events.ToArray());
             _factory.Append(name, data, originalVersion);
 
             // technically there should be parallel process that gets published changes from

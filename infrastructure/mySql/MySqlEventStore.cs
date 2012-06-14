@@ -71,7 +71,7 @@ WHERE Name=?name";
                         {
                             if (version != serverVersion)
                             {
-                                throw EventStoreConcurrencyException.Create(version, serverVersion, key);
+                                throw new AppendOnlyStoreConcurrencyException(version, serverVersion, key);
                             }
                         }
                     }

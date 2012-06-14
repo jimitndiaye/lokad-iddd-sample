@@ -80,7 +80,7 @@ namespace lokad_iddd_sample
                         {
                             if (version != expectedVersion)
                             {
-                                throw EventStoreConcurrencyException.Create(version, expectedVersion, key);
+                                throw new AppendOnlyStoreConcurrencyException(version, expectedVersion, key);
                             }
                         }
                     }

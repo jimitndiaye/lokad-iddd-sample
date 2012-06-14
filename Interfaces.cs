@@ -50,9 +50,10 @@ namespace lokad_iddd_sample
     [Serializable]
     public class AppendOnlyStoreConcurrencyException : Exception
     {
-        public AppendOnlyStoreConcurrencyException() { }
-        public AppendOnlyStoreConcurrencyException(string message) : base(message) { }
-        public AppendOnlyStoreConcurrencyException(string message, Exception inner) : base(message, inner) { }
+        
+        public int ExpectedVersion { get; private set; }
+        public int ActualVersion { get; private set; }
+        public string Name { get; private set; }
 
         protected AppendOnlyStoreConcurrencyException(
             SerializationInfo info,
@@ -63,7 +64,9 @@ namespace lokad_iddd_sample
             : base(
                 string.Format("Expected version {0} in stream '{1}' but got {2}", expectedVersion, name, actualVersion))
         {
-
+            Name = name;
+            ExpectedVersion = expectedVersion;
+            ActualVersion = actualVersion;
         }
     }
 
@@ -89,15 +92,6 @@ namespace lokad_iddd_sample
 
     public interface IIdentity {}
 
-    public interface IEventStoreStrategy
-    {
-        // will serialize an event into array of bytes
-        byte[] SerializeEvent(IEvent[] e);
-        // deserializes event from an array of bytes
-        IEvent[] DeserializeEvent(byte[] data);
-        // converts identity into string identifier
-        string IdentityToString(IIdentity id);
-    }
 
 
     [Serializable]
