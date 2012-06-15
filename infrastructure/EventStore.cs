@@ -64,10 +64,12 @@ namespace lokad_iddd_sample
             // event store and sends them via messages.
             // however, for simplicity, we'll just send them to console from here
 
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
             foreach (var @event in events)
             {
                 Console.WriteLine("  {0}@{1} => {2}", id,originalVersion, @event);
             }
+            Console.ForegroundColor = ConsoleColor.DarkGray;
         }
     }
 }

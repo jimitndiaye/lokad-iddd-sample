@@ -92,7 +92,10 @@ namespace lokad_iddd_sample
 
     public interface IIdentity {}
 
-
+    public interface IPricingModel
+    {
+        CurrencyAmount GetOverdraftThreshold(Currency currency);
+    }
 
     [Serializable]
     public class EventStoreConcurrencyException : Exception

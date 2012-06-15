@@ -20,15 +20,16 @@ namespace lokad_iddd_sample
         }
 
 
-        public void Create(CustomerId id, string name)
+        public void Create(CustomerId id, string name, Currency currency)
         {
             if (_state.Created)
                 throw new InvalidOperationException("Customer was already created");
-            Apply(new CustomerCreated()
+            Apply(new CustomerCreated
                 {
                     Created = DateTime.UtcNow,
                     Name = name,
-                    Id = id
+                    Id = id,
+                    Currency = currency
                 });
         }
         public void Rename(string name)
@@ -41,6 +42,55 @@ namespace lokad_iddd_sample
                     Id = _state.Id,
                     OldName = _state.Name,
                     Renamed = DateTime.UtcNow
+                });
+        }
+
+        public void LockCustomer(string reason)
+        {
+            if (_state.ConsumptionLocked)
+                return;
+            
+            Apply(new CustomerLocked
+                {
+                    Id = _state.Id,
+                    Reason = reason
+                });
+        }
+
+        public void LockForAccountOverdraft(IPricingModel model, string comment)
+        {
+            if (_state.ManualBilling) return;
+            var balance = model.GetOverdraftThreshold(_state.Currency);
+            if (_state.Balance < balance)
+            {
+                LockCustomer("Overdraft. " + comment);
+            }
+
+        }
+
+        public void AddPayment(string name, CurrencyAmount amount)
+        {
+            Apply(new CustomerPaymentAdded()
+                {
+                    Id = _state.Id,
+                    Payment = amount,
+                    NewBalance = _state.Balance + amount,
+                    PaymentName = name,
+                    Transaction = _state.MaxTransactionId + 1,
+                    TimeUtc = DateTime.UtcNow
+                });
+        }
+
+        public void Charge(string name, CurrencyAmount amount)
+        {
+            Apply(new CustomerChargeAdded()
+                {
+                    Id = _state.Id,
+                    Charge = amount,
+                    NewBalance = _state.Balance - amount,
+                    ChargeName = name,
+                    Transaction = _state.MaxTransactionId + 1,
+                    TimeUtc = DateTime.UtcNow
                 });
         }
     }

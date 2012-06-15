@@ -17,8 +17,11 @@ namespace lokad_iddd_sample
             var server = new Server();
             server.Handlers.Add(new CustomerApplicationService(events));
 
-            server.Dispatch(new CreateCustomer { Id = new CustomerId(12), Name = "Lokad"});
+            server.Dispatch(new CreateCustomer { Id = new CustomerId(12), Name = "Lokad", Currency = Currency.Eur});
             server.Dispatch(new RenameCustomer { Id = new CustomerId(12), NewName = "Lokad SAS"});
+            server.Dispatch(new AddCustomerPayment { Id = new CustomerId(12), Amount = 15m.Eur(), Name = "Cash" });
+            server.Dispatch(new ChargeCustomer { Id = new CustomerId(12), Amount = 20m.Eur(), Name = "Forecasting"});
+
 
             Console.WriteLine("Press any key to continue");
             Console.ReadKey(true);
@@ -40,6 +43,7 @@ namespace lokad_iddd_sample
             if (Directory.Exists(combine))
             {
                 Console.WriteLine("Wiping even store for demo purposes");
+                Console.WriteLine();
                 Directory.Delete(combine, true);
             }
             var store = new FileAppendOnlyStore(combine);
@@ -51,7 +55,9 @@ namespace lokad_iddd_sample
         {
             public void Dispatch(ICommand cmd)
             {
+                Console.ForegroundColor= ConsoleColor.DarkCyan;
                 Console.WriteLine(cmd);
+                Console.ForegroundColor=ConsoleColor.DarkGray;
                 foreach (var handler in Handlers)
                 {
                     ((dynamic) handler).When((dynamic) cmd);
