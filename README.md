@@ -41,14 +41,18 @@ Then, you can dive into the code or try plugging in other types of stores.
 Each store requires connection string and will auto-create all required resources
 automatically.
 
+### Want More?
+
+If you want more details, here's what you can do next:
+
+* Check out the [Domain Driven Design community](http://dddcommunity.org/)
+* Dive into [Lokad.CQRS Sample Project](http://lokad.github.com/lokad-cqrs/) (much more detailed version of this sample)
+* Follow [@VaughnVernon](https://twitter.com/#!/VaughnVernon).
+* Follow [@abdullin](https://twitter.com/#!/abdullin).
+
+If you have any questions, please feel free to ask contributors.
+
 ### Authors and Contributors
 
 * [Vaughn Vernon](http://vaughnvernon.co/), Book author and reviewer
 * [Rinat Abdullin](http://abdullin.com), Tech Leader at [Lokad](http://www.lokad.com/), Big Data Analytics for Retail.
-
-### Support or Contact
-
-Having questions? Please feel free to get in touch via twitter:
-
-* Vaughn Vernon: [@VaughnVernon](https://twitter.com/#!/VaughnVernon)
-* Rinat Abdullin: [@abdullin](https://twitter.com/#!/abdullin)
