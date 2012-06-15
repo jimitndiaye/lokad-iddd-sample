@@ -8,8 +8,8 @@
     <ProjectGuid>{D79777B6-AFD9-4CCE-824B-98C704C00AEE}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>lokad_iddd_sample</RootNamespace>
-    <AssemblyName>lokad-iddd-sample</AssemblyName>
+    <RootNamespace>Sample</RootNamespace>
+    <AssemblyName>Sample</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -36,34 +36,30 @@
   <ItemGroup>
     <Reference Include="Microsoft.WindowsAzure.StorageClient, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Library\Azure\Microsoft.WindowsAzure.StorageClient.dll</HintPath>
+      <HintPath>..\Library\Azure\Microsoft.WindowsAzure.StorageClient.dll</HintPath>
     </Reference>
     <Reference Include="mysql.data">
-      <HintPath>Library\mysql\mysql.data.dll</HintPath>
+      <HintPath>..\Library\mysql\mysql.data.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="domain\Contracts.cs" />
-    <Compile Include="domain\Customer.cs" />
-    <Compile Include="domain\CustomerApplicationService.cs" />
-    <Compile Include="domain\CustomerState.cs" />
-    <Compile Include="infrastructure\AppendOnlyStream.cs" />
-    <Compile Include="infrastructure\Azure\AutoRenewLease.cs" />
-    <Compile Include="infrastructure\Azure\BlobAppendOnlyStore.cs" />
-    <Compile Include="infrastructure\EventStore.cs" />
+    <Compile Include="Domain\Contracts.cs" />
+    <Compile Include="Domain\Customer.cs" />
+    <Compile Include="Domain\CustomerApplicationService.cs" />
+    <Compile Include="Domain\CustomerState.cs" />
+    <Compile Include="Storage\AppendOnlyStream.cs" />
+    <Compile Include="Storage\EventStore.cs" />
+    <Compile Include="StorageImplementations\Azure\AutoRenewLease.cs" />
+    <Compile Include="StorageImplementations\Azure\BlobAppendOnlyStore.cs" />
+    <Compile Include="StorageImplementations\Files\FileEventStore.cs" />
+    <Compile Include="StorageImplementations\MsSql\SqlEventStore.cs" />
+    <Compile Include="StorageImplementations\mySql\MySqlEventStore.cs" />
     <Compile Include="Interfaces.cs" />
-    <Compile Include="infrastructure\Files\FileEventStore.cs" />
-    <Compile Include="infrastructure\mySql\MySqlEventStore.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="infrastructure\MsSql\SqlEventStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

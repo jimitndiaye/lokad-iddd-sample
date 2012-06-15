@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using Sample.Domain;
+using Sample.Storage;
+using Sample.StorageImplementations.Files;
+using Sample.StorageImplementations.MsSql;
 
-namespace lokad_iddd_sample
+namespace Sample
 {
     public static class Program
     {

@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace lokad_iddd_sample
+namespace Sample.Storage
 {
     /// <summary>
     /// Helps to write data to the underlying store, which accepts only

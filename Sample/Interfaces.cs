@@ -8,8 +8,9 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Sample.Domain;
 
-namespace lokad_iddd_sample
+namespace Sample
 {
 
     public interface IAppendOnlyStore : IDisposable

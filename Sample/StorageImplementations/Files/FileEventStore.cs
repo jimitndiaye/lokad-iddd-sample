@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
-namespace lokad_iddd_sample
+namespace Sample.StorageImplementations.Files
 {
     /// <summary>
     /// Simple embedded append-only store that uses Riak.Bitcask model

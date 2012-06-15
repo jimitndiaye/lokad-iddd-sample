@@ -8,8 +8,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using Microsoft.WindowsAzure.StorageClient;
+using Sample.Storage;
 
-namespace lokad_iddd_sample
+namespace Sample.StorageImplementations.Azure
 {
     /// <summary>
     /// <para>This is embedded append-only store implemented on top of cloud page blobs 

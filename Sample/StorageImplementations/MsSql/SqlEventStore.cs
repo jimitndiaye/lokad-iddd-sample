@@ -5,11 +5,10 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 
-namespace lokad_iddd_sample
+namespace Sample.StorageImplementations.MsSql
 {
     /// <summary>
     /// This is a SQL event storage simplified to demonstrate essential principles.

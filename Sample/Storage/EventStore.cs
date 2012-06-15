@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace lokad_iddd_sample
+namespace Sample.Storage
 {
     public sealed class EventStore : IEventStore
     {

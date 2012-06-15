@@ -1,6 +1,6 @@
 using System;
 
-namespace lokad_iddd_sample
+namespace Sample.Domain
 {
     [Serializable]
     public sealed class CustomerId : IIdentity

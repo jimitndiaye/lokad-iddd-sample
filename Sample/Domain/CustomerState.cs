@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace lokad_iddd_sample
+namespace Sample.Domain
 {
     public class CustomerState
     {

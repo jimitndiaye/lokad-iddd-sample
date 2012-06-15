@@ -4,7 +4,7 @@ using System.Threading;
 using Microsoft.WindowsAzure.StorageClient;
 using Microsoft.WindowsAzure.StorageClient.Protocol;
 
-namespace lokad_iddd_sample
+namespace Sample.StorageImplementations.Azure
 {
     public class AutoRenewLease : IDisposable
     {

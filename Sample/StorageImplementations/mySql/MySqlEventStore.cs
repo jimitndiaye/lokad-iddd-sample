@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 
-namespace lokad_iddd_sample
+namespace Sample.StorageImplementations.mySql
 {
     /// <summary>
     /// This is a SQL event storage simplified to demonstrate essential principles.
