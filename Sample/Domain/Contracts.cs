@@ -157,7 +157,7 @@ namespace Sample.Domain
 
         public override string ToString()
         {
-            return string.Format("Added {1} - '{2}' | Tx {0} => {3}", 
+            return string.Format("Added '{2}' {1} | Tx {0} => {3}", 
                 Transaction, Payment, PaymentName, NewBalance);
         }
     }
@@ -173,7 +173,7 @@ namespace Sample.Domain
 
         public override string ToString()
         {
-            return string.Format("Charged {1} - '{2}' | Tx {0} => {3}",
+            return string.Format("Charged '{2}' {1} | Tx {0} => {3}",
                 Transaction, Charge, ChargeName, NewBalance);
         }
 
