@@ -6,9 +6,10 @@ namespace Sample.Domain
     {
         readonly IEventStore _eventStore;
         readonly IPricingModel _pricingModel;
-        public CustomerApplicationService(IEventStore eventStore)
+        public CustomerApplicationService(IEventStore eventStore, IPricingModel pricingModel)
         {
             _eventStore = eventStore;
+            _pricingModel = pricingModel;
         }
 
 
@@ -26,7 +27,7 @@ namespace Sample.Domain
 
         public void When(CreateCustomer c)
         {
-            Update(c.Id, a => a.Create(c.Id,c.Name, c.Currency));
+            Update(c.Id, a => a.Create(c.Id,c.Name, c.Currency, _pricingModel));
         }
         public void When(RenameCustomer c)
         {

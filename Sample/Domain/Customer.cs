@@ -20,7 +20,7 @@ namespace Sample.Domain
         }
 
 
-        public void Create(CustomerId id, string name, Currency currency)
+        public void Create(CustomerId id, string name, Currency currency, IPricingModel model)
         {
             if (_state.Created)
                 throw new InvalidOperationException("Customer was already created");
@@ -31,6 +31,9 @@ namespace Sample.Domain
                     Id = id,
                     Currency = currency
                 });
+
+            var bonus = model.GetWelcomeBonus(currency);
+            AddPayment("Welcome bonus", bonus);
         }
         public void Rename(string name)
         {
@@ -92,6 +95,23 @@ namespace Sample.Domain
                     Transaction = _state.MaxTransactionId + 1,
                     TimeUtc = DateTime.UtcNow
                 });
+        }
+    }
+
+    public sealed class PricingModel : IPricingModel
+    {
+        public CurrencyAmount GetOverdraftThreshold(Currency currency)
+        {
+            if (currency == Currency.Eur)
+                return (-10m).Eur();
+            throw new NotImplementedException();
+        }
+
+        public CurrencyAmount GetWelcomeBonus(Currency currency)
+        {
+            if (currency == Currency.Eur)
+                return 15m.Eur();
+            throw new NotImplementedException();
         }
     }
 }

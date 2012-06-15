@@ -12,20 +12,23 @@ namespace Sample
     {
         public static void Main()
         {
+            if (File.Exists("Readme.md"))
+                Console.WriteLine(File.ReadAllText("Readme.md"));
+            
+            // persistence
             var store = CreateFileStoreForTesting();
             var events = new EventStore(store);
-            //var store = new FileEventStore(new SampleStrategy(), "temp");
-            
+
+            // various domain services
+            var pricing = new PricingModel();
 
             var server = new Server();
-            server.Handlers.Add(new CustomerApplicationService(events));
+            server.Handlers.Add(new CustomerApplicationService(events, pricing));
 
             server.Dispatch(new CreateCustomer { Id = new CustomerId(12), Name = "Lokad", Currency = Currency.Eur});
             server.Dispatch(new RenameCustomer { Id = new CustomerId(12), NewName = "Lokad SAS"});
-            server.Dispatch(new AddCustomerPayment { Id = new CustomerId(12), Amount = 15m.Eur(), Name = "Cash" });
             server.Dispatch(new ChargeCustomer { Id = new CustomerId(12), Amount = 20m.Eur(), Name = "Forecasting"});
-
-
+            
             Console.WriteLine("Press any key to continue");
             Console.ReadKey(true);
         }
@@ -45,6 +48,7 @@ namespace Sample
             var combine = Path.Combine(Directory.GetCurrentDirectory(), "store");
             if (Directory.Exists(combine))
             {
+                Console.WriteLine();
                 Console.WriteLine("Wiping even store for demo purposes");
                 Console.WriteLine();
                 Directory.Delete(combine, true);
@@ -59,7 +63,7 @@ namespace Sample
             public void Dispatch(ICommand cmd)
             {
                 Console.ForegroundColor= ConsoleColor.DarkCyan;
-                Console.WriteLine(cmd);
+                Console.WriteLine("Command: " + cmd);
                 Console.ForegroundColor=ConsoleColor.DarkGray;
                 foreach (var handler in Handlers)
                 {

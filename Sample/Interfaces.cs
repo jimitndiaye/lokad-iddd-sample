@@ -96,6 +96,7 @@ namespace Sample
     public interface IPricingModel
     {
         CurrencyAmount GetOverdraftThreshold(Currency currency);
+        CurrencyAmount GetWelcomeBonus(Currency currency);
     }
 
     [Serializable]
