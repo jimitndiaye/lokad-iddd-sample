@@ -51,6 +51,7 @@
     <Compile Include="Domain\Customer.cs" />
     <Compile Include="Domain\CustomerApplicationService.cs" />
     <Compile Include="Domain\CustomerState.cs" />
+    <Compile Include="LoggingWrapper.cs" />
     <Compile Include="Storage\AppendOnlyStream.cs" />
     <Compile Include="Storage\EventStore.cs" />
     <Compile Include="StorageImplementations\Azure\AutoRenewLease.cs" />

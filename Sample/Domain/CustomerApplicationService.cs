@@ -2,7 +2,7 @@ using System;
 
 namespace Sample.Domain
 {
-    public sealed class CustomerApplicationService
+    public sealed class CustomerApplicationService : IApplicationService
     {
         // event store for accessing event streams
         readonly IEventStore _eventStore;
@@ -73,5 +73,11 @@ namespace Sample.Domain
             _eventStore.AppendToStream(customerId, stream.Version, customer.Changes);
         }
 
+        public void Execute(ICommand cmd)
+        {
+            // pass command to a specific method named when
+            // that can handle the command
+            ((dynamic)this).When((dynamic)cmd);
+        }
     }
 }

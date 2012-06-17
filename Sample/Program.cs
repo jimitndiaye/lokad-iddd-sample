@@ -23,7 +23,7 @@ namespace Sample
             var pricing = new PricingService();
 
             var server = new Server();
-            server.Handlers.Add(new CustomerApplicationService(events, pricing));
+            server.Handlers.Add(new LoggingWrapper(new CustomerApplicationService(events, pricing)));
 
             server.Dispatch(new CreateCustomer { Id = new CustomerId(12), Name = "Lokad", Currency = Currency.Eur});
             server.Dispatch(new RenameCustomer { Id = new CustomerId(12), NewName = "Lokad SAS"});
@@ -62,16 +62,13 @@ namespace Sample
         {
             public void Dispatch(ICommand cmd)
             {
-                Console.ForegroundColor= ConsoleColor.DarkCyan;
-                Console.WriteLine("Command: " + cmd);
-                Console.ForegroundColor=ConsoleColor.DarkGray;
                 foreach (var handler in Handlers)
                 {
-                    ((dynamic) handler).When((dynamic) cmd);
+                    handler.Execute(cmd);
                 }
             }
 
-            public readonly IList<object> Handlers = new List<object>(); 
+            public readonly IList<IApplicationService> Handlers = new List<IApplicationService>(); 
         }
     }
 }

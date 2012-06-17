@@ -71,6 +71,10 @@ namespace Sample
         }
     }
 
+    public interface IApplicationService
+    {
+        void Execute(ICommand cmd);
+    }
 
 
     public interface IEventStore
