@@ -2,7 +2,10 @@ using System;
 
 namespace Sample
 {
-    public sealed class LoggingWrapper : IApplicationService
+    /// <summary>
+    /// Demonstrates how to add logging aspect to any application service
+    /// </summary>
+    public class LoggingWrapper : IApplicationService
     {
         readonly IApplicationService _service;
         public LoggingWrapper(IApplicationService service)
@@ -15,11 +18,16 @@ namespace Sample
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine("Command: " + cmd);
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            _service.Execute(cmd);
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.WriteLine("  Success");
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-
+            try
+            {
+                _service.Execute(cmd);
+            }
+            catch( Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine(ex);
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+            }
         }
     }
 }
