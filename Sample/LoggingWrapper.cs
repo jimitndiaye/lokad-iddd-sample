@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace Sample
 {
@@ -13,20 +14,27 @@ namespace Sample
             _service = service;
         }
 
+        static void WriteLine(ConsoleColor color, string text, params object[] args)
+        {
+            var oldColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Console.WriteLine(text, args);
+            Console.ForegroundColor = oldColor;
+        }
+
         public void Execute(ICommand cmd)
         {
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.WriteLine("Command: " + cmd);
-            Console.ForegroundColor = ConsoleColor.DarkGray;
+            WriteLine(ConsoleColor.DarkCyan, "Command: " + cmd);
             try
             {
+                var watch = Stopwatch.StartNew();
                 _service.Execute(cmd);
+                var ms = watch.ElapsedMilliseconds;
+                WriteLine(ConsoleColor.DarkCyan, "  Completed in {0} ms", ms);
             }
             catch( Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine(ex);
-                Console.ForegroundColor = ConsoleColor.DarkGray;
+                WriteLine(ConsoleColor.DarkRed, "Error: {0}", ex);
             }
         }
     }

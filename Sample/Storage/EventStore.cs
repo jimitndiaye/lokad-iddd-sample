@@ -8,12 +8,12 @@ namespace Sample.Storage
 {
     public sealed class EventStore : IEventStore
     {
-        public EventStore(IAppendOnlyStore factory)
+        public EventStore(IAppendOnlyStore store)
         {
-            _factory = factory;
+            _store = store;
         }
 
-        readonly IAppendOnlyStore _factory;
+        readonly IAppendOnlyStore _store;
 
         readonly BinaryFormatter _formatter = new BinaryFormatter();
         byte[] SerializeEvent(IEvent[] e)
@@ -41,7 +41,7 @@ namespace Sample.Storage
         public EventStream LoadEventStream(IIdentity id, int skip, int take)
         {
             var name = IdentityToString(id);
-            var records = _factory.ReadRecords(name, skip, take).ToList();
+            var records = _store.ReadRecords(name, skip, take).ToList();
             var stream = new EventStream();
 
             foreach (var tapeRecord in records)
@@ -58,7 +58,17 @@ namespace Sample.Storage
                 return;
             var name = IdentityToString(id);
             var data = SerializeEvent(events.ToArray());
-            _factory.Append(name, data, originalVersion);
+            try
+            {
+                _store.Append(name, data, originalVersion);
+            }
+            catch(AppendOnlyStoreConcurrencyException e)
+            {
+                // load server events
+                var server = LoadEventStream(id, 0, int.MaxValue);
+                // throw a real problem
+                throw OptimisticConcurrencyException.Create(server.Version, e.ExpectedVersion, id, server.Events);
+            }
 
             // technically there should be parallel process that gets published changes from
             // event store and sends them via messages.

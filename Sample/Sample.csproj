@@ -51,6 +51,9 @@
     <Compile Include="Domain\Customer.cs" />
     <Compile Include="Domain\CustomerApplicationService.cs" />
     <Compile Include="Domain\CustomerState.cs" />
+    <Compile Include="Storage\IAppendOnlyStore.cs" />
+    <Compile Include="Storage\IEventStore.cs" />
+    <Compile Include="Domain\IPricingService.cs" />
     <Compile Include="LoggingWrapper.cs" />
     <Compile Include="Storage\AppendOnlyStream.cs" />
     <Compile Include="Storage\EventStore.cs" />
