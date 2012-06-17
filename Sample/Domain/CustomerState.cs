@@ -55,8 +55,8 @@ namespace Sample.Domain
 
         public void Mutate(IEvent e)
         {
-            // redirect event to one of the 'When' handlers
-            // via .NET magic
+            // .NET magic to call one of 'When' handlers with 
+            // matching signature 
             ((dynamic) this).When((dynamic)e);
         }
     }

@@ -20,7 +20,7 @@ namespace Sample
             var events = new EventStore(store);
 
             // various domain services
-            var pricing = new PricingModel();
+            var pricing = new PricingService();
 
             var server = new Server();
             server.Handlers.Add(new CustomerApplicationService(events, pricing));

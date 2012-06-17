@@ -15,12 +15,14 @@ namespace Sample.Domain
 
         void Apply(IEvent e)
         {
+            // pass each event to modify current in-memory state
             _state.Mutate(e);
+            // append event to change list for further persistence
             Changes.Add(e);
         }
 
 
-        public void Create(CustomerId id, string name, Currency currency, IPricingModel model)
+        public void Create(CustomerId id, string name, Currency currency, IPricingService service)
         {
             if (_state.Created)
                 throw new InvalidOperationException("Customer was already created");
@@ -32,7 +34,7 @@ namespace Sample.Domain
                     Currency = currency
                 });
 
-            var bonus = model.GetWelcomeBonus(currency);
+            var bonus = service.GetWelcomeBonus(currency);
             AddPayment("Welcome bonus", bonus);
         }
         public void Rename(string name)
@@ -60,11 +62,11 @@ namespace Sample.Domain
                 });
         }
 
-        public void LockForAccountOverdraft(IPricingModel model, string comment)
+        public void LockForAccountOverdraft(string comment, IPricingService service)
         {
             if (_state.ManualBilling) return;
-            var balance = model.GetOverdraftThreshold(_state.Currency);
-            if (_state.Balance < balance)
+            var threshold = service.GetOverdraftThreshold(_state.Currency);
+            if (_state.Balance < threshold)
             {
                 LockCustomer("Overdraft. " + comment);
             }
@@ -98,7 +100,7 @@ namespace Sample.Domain
         }
     }
 
-    public sealed class PricingModel : IPricingModel
+    public sealed class PricingService : IPricingService
     {
         public CurrencyAmount GetOverdraftThreshold(Currency currency)
         {

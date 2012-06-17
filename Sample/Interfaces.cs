@@ -75,9 +75,10 @@ namespace Sample
 
     public interface IEventStore
     {
-        EventStream LoadEventStream(IIdentity id, int skip, int take);
+        EventStream LoadEventStream(IIdentity id, int skip = 0, int take = int.MaxValue);
         void AppendToStream(IIdentity id, int expectedVersion, ICollection<IEvent> events);
     }
+
 
     public class EventStream
     {
@@ -93,7 +94,7 @@ namespace Sample
 
     public interface IIdentity {}
 
-    public interface IPricingModel
+    public interface IPricingService
     {
         CurrencyAmount GetOverdraftThreshold(Currency currency);
         CurrencyAmount GetWelcomeBonus(Currency currency);
