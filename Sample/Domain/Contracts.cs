@@ -161,6 +161,8 @@ namespace Sample.Domain
                 Transaction, Payment, PaymentName, NewBalance);
         }
     }
+
+
     [Serializable]
     public sealed class CustomerChargeAdded : IEvent
     {

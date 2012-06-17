@@ -1,3 +1,10 @@
+#region (c) 2012-2012 Lokad - New BSD License 
+
+// Copyright (c) Lokad 2012-2012, http://www.lokad.com
+// This code is released as Open Source under the terms of the New BSD Licence
+
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -18,25 +25,29 @@ namespace Sample
         public List<IEvent> Events = new List<IEvent>();
     }
 
+    /// <summary>
+    /// Is thrown by event store if there were changes since our last version
+    /// </summary>
     [Serializable]
     public class OptimisticConcurrencyException : Exception
     {
-
         public int ActualVersion { get; private set; }
         public int ExpectedVersion { get; private set; }
         public IIdentity Id { get; private set; }
-        public IList<IEvent> ServerEvents { get; private set; }
+        public IList<IEvent> ActualEvents { get; private set; }
 
-        OptimisticConcurrencyException(string message, int actualVersion, int expectedVersion, IIdentity id, IList<IEvent> serverEvents)
+        OptimisticConcurrencyException(string message, int actualVersion, int expectedVersion, IIdentity id,
+            IList<IEvent> serverEvents)
             : base(message)
         {
             ActualVersion = actualVersion;
             ExpectedVersion = expectedVersion;
             Id = id;
-            ServerEvents = serverEvents;
+            ActualEvents = serverEvents;
         }
 
-        public static OptimisticConcurrencyException Create(int actual, int expected, IIdentity id, IList<IEvent> serverEvents)
+        public static OptimisticConcurrencyException Create(int actual, int expected, IIdentity id,
+            IList<IEvent> serverEvents)
         {
             var message = string.Format("Expected v{0} but found v{1} in stream '{2}'", expected, actual, id);
             return new OptimisticConcurrencyException(message, actual, expected, id, serverEvents);
@@ -45,6 +56,21 @@ namespace Sample
         protected OptimisticConcurrencyException(
             SerializationInfo info,
             StreamingContext context)
-            : base(info, context) { }
+            : base(info, context) {}
+    }
+
+    /// <summary>
+    /// Is supposed to be thrown by the client code, when it fails to resolve concurrency problem
+    /// </summary>
+    [Serializable]
+    public class RealConcurrencyException : Exception
+    {
+        public RealConcurrencyException() {}
+        public RealConcurrencyException(string message) : base(message) {}
+        public RealConcurrencyException(string message, Exception inner) : base(message, inner) {}
+
+        protected RealConcurrencyException(
+            SerializationInfo info,
+            StreamingContext context) : base(info, context) {}
     }
 }
