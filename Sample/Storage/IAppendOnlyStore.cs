@@ -6,30 +6,30 @@ namespace Sample
 {
     public interface IAppendOnlyStore : IDisposable
     {
-        void Append(string key, byte[] buffer, int serverVersion = -1);
-        IEnumerable<TapeRecord> ReadRecords(string key, int afterVersion, int maxCount);
-        IEnumerable<AppendRecord> ReadRecords(int afterVersion, int maxCount);
+        void Append(string name, byte[] data, int expectedVersion = -1);
+        IEnumerable<DataWithVersion> ReadRecords(string name, int afterVersion, int maxCount);
+        IEnumerable<DataWithName> ReadRecords(int afterVersion, int maxCount);
 
         void Close();
     }
 
-    public sealed class TapeRecord
+    public sealed class DataWithVersion
     {
         public readonly int Version;
         public readonly byte[] Data;
 
-        public TapeRecord(int version, byte[] data)
+        public DataWithVersion(int version, byte[] data)
         {
             Version = version;
             Data = data;
         }
     }
-    public sealed class AppendRecord
+    public sealed class DataWithName
     {
         public readonly string Name;
         public readonly byte[] Data;
 
-        public AppendRecord(string name, byte[] data)
+        public DataWithName(string name, byte[] data)
         {
             Name = name;
             Data = data;

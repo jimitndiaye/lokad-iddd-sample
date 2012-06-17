@@ -40,8 +40,8 @@ namespace Sample.StorageImplementations.Files
         FileStream _currentWriter;
 
         // caches
-        readonly ConcurrentDictionary<string, TapeRecord[]> _items = new ConcurrentDictionary<string, TapeRecord[]>();
-        AppendRecord[] _all = new AppendRecord[0];
+        readonly ConcurrentDictionary<string, DataWithVersion[]> _items = new ConcurrentDictionary<string, DataWithVersion[]>();
+        DataWithName[] _all = new DataWithName[0];
 
         public void Initialize()
         {
@@ -147,25 +147,25 @@ namespace Sample.StorageImplementations.Files
             _info = new DirectoryInfo(path);
         }
 
-        public void Append(string key, byte[] buffer, int serverVersion = -1)
+        public void Append(string name, byte[] data, int expectedVersion = -1)
         {
             // should be locked
             try
             {
                 _thread.EnterWriteLock();
 
-                var list = _items.GetOrAdd(key, s => new TapeRecord[0]);
-                if (serverVersion >= 0)
+                var list = _items.GetOrAdd(name, s => new DataWithVersion[0]);
+                if (expectedVersion >= 0)
                 {
-                    if (list.Length != serverVersion)
-                        throw new AppendOnlyStoreConcurrencyException(serverVersion, list.Length, key);
+                    if (list.Length != expectedVersion)
+                        throw new AppendOnlyStoreConcurrencyException(expectedVersion, list.Length, name);
                 }
 
                 EnsureWriterExists(_all.Length);
                 int commit = list.Length + 1;
 
-                PersistInFile(key, buffer, commit);
-                AddToCaches(key, buffer, commit);
+                PersistInFile(name, data, commit);
+                AddToCaches(name, data, commit);
             }
             catch
             {
@@ -213,8 +213,8 @@ namespace Sample.StorageImplementations.Files
 
         void AddToCaches(string key, byte[] buffer, int commit)
         {
-            var record = new TapeRecord(commit, buffer);
-            _all = ImmutableAdd(_all, new AppendRecord(key, buffer));
+            var record = new DataWithVersion(commit, buffer);
+            _all = ImmutableAdd(_all, new DataWithName(key, buffer));
             _items.AddOrUpdate(key, s => new[] { record }, (s, records) => ImmutableAdd(records, record));
         }
 
@@ -226,14 +226,14 @@ namespace Sample.StorageImplementations.Files
             return copy;
         }
 
-        public IEnumerable<TapeRecord> ReadRecords(string key, int afterVersion, int maxCount)
+        public IEnumerable<DataWithVersion> ReadRecords(string name, int afterVersion, int maxCount)
         {
             // no lock is needed.
-            TapeRecord[] list;
-            return _items.TryGetValue(key, out list) ? list : Enumerable.Empty<TapeRecord>();
+            DataWithVersion[] list;
+            return _items.TryGetValue(name, out list) ? list : Enumerable.Empty<DataWithVersion>();
         }
 
-        public IEnumerable<AppendRecord> ReadRecords(int afterVersion, int maxCount)
+        public IEnumerable<DataWithName> ReadRecords(int afterVersion, int maxCount)
         {
             // collection is immutable so we don't care about locks
             return _all.Skip((int)afterVersion).Take(maxCount);

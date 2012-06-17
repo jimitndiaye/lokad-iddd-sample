@@ -6,16 +6,10 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Sample.Storage
 {
-    public sealed class EventStore : IEventStore
+    public class EventStore : IEventStore
     {
-        public EventStore(IAppendOnlyStore store)
-        {
-            _store = store;
-        }
-
-        readonly IAppendOnlyStore _store;
-
         readonly BinaryFormatter _formatter = new BinaryFormatter();
+
         byte[] SerializeEvent(IEvent[] e)
         {
             using (var mem = new MemoryStream())
@@ -33,15 +27,16 @@ namespace Sample.Storage
             }
         }
 
-        string IdentityToString(IIdentity id)
+        public EventStore(IAppendOnlyStore appendOnlyStore)
         {
-            return id.ToString();
+            _appendOnlyStore = appendOnlyStore;
         }
 
+        readonly IAppendOnlyStore _appendOnlyStore;
         public EventStream LoadEventStream(IIdentity id, int skip, int take)
         {
             var name = IdentityToString(id);
-            var records = _store.ReadRecords(name, skip, take).ToList();
+            var records = _appendOnlyStore.ReadRecords(name, skip, take).ToList();
             var stream = new EventStream();
 
             foreach (var tapeRecord in records)
@@ -52,6 +47,17 @@ namespace Sample.Storage
             return stream;
         }
 
+        string IdentityToString(IIdentity id)
+        {
+            // in this project all identities produce proper name
+            return id.ToString();
+        }
+
+        public EventStream LoadEventStream(IIdentity id)
+        {
+            return LoadEventStream(id, 0, int.MaxValue);
+        }
+
         public void AppendToStream(IIdentity id, int originalVersion, ICollection<IEvent> events)
         {
             if (events.Count == 0)
@@ -60,7 +66,7 @@ namespace Sample.Storage
             var data = SerializeEvent(events.ToArray());
             try
             {
-                _store.Append(name, data, originalVersion);
+                _appendOnlyStore.Append(name, data, originalVersion);
             }
             catch(AppendOnlyStoreConcurrencyException e)
             {
@@ -70,9 +76,9 @@ namespace Sample.Storage
                 throw OptimisticConcurrencyException.Create(server.Version, e.ExpectedVersion, id, server.Events);
             }
 
-            // technically there should be parallel process that gets published changes from
-            // event store and sends them via messages.
-            // however, for simplicity, we'll just send them to console from here
+            // technically there should be parallel process that queries new changes from 
+            // event store and sends them via messages. 
+            // however, for demo purposes, we'll just send them to console from here
 
             Console.ForegroundColor = ConsoleColor.DarkGreen;
             foreach (var @event in events)

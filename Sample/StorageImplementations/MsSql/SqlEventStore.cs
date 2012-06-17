@@ -57,7 +57,7 @@ namespace Sample.StorageImplementations.MsSql
             
         }
 
-        public void Append(string key, byte[] buffer, int expectedVersion = -1)
+        public void Append(string name, byte[] data, int expectedVersion = -1)
         {
             
             using (var conn = new SqlConnection(_connectionString))
@@ -73,13 +73,13 @@ namespace Sample.StorageImplementations.MsSql
                     int version;
                     using (var cmd = new SqlCommand(sql, conn, tx))
                     {
-                        cmd.Parameters.AddWithValue("@name", key);
+                        cmd.Parameters.AddWithValue("@name", name);
                         version = (int)cmd.ExecuteScalar();
                         if (expectedVersion >= 0)
                         {
                             if (version != expectedVersion)
                             {
-                                throw new AppendOnlyStoreConcurrencyException(version, expectedVersion, key);
+                                throw new AppendOnlyStoreConcurrencyException(version, expectedVersion, name);
                             }
                         }
                     }
@@ -89,9 +89,9 @@ namespace Sample.StorageImplementations.MsSql
 
                     using (var cmd = new SqlCommand(txt, conn, tx))
                     {
-                        cmd.Parameters.AddWithValue("@name", key);
+                        cmd.Parameters.AddWithValue("@name", name);
                         cmd.Parameters.AddWithValue("@version", version + 1);
-                        cmd.Parameters.AddWithValue("@data", buffer);
+                        cmd.Parameters.AddWithValue("@data", data);
                         cmd.ExecuteNonQuery();
                     }
                     tx.Commit();
@@ -99,7 +99,7 @@ namespace Sample.StorageImplementations.MsSql
             }
         }
 
-        public IEnumerable<TapeRecord> ReadRecords(string key, int afterVersion, int maxCount)
+        public IEnumerable<DataWithVersion> ReadRecords(string name, int afterVersion, int maxCount)
         {
             using (var conn = new SqlConnection(_connectionString))
             {
@@ -110,7 +110,7 @@ namespace Sample.StorageImplementations.MsSql
                         ORDER BY Version";
                 using (var cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@p1", key);
+                    cmd.Parameters.AddWithValue("@p1", name);
                     cmd.Parameters.AddWithValue("@take", maxCount);
                     cmd.Parameters.AddWithValue("@skip", afterVersion);
                     
@@ -121,14 +121,14 @@ namespace Sample.StorageImplementations.MsSql
                         {
                             var data = (byte[])reader["Data"];
                             var version = (int)reader["Version"];
-                            yield return new TapeRecord(version, data);
+                            yield return new DataWithVersion(version, data);
                         }
                     }
                 }
             }
         }
 
-        public IEnumerable<AppendRecord> ReadRecords(int afterVersion, int maxCount)
+        public IEnumerable<DataWithName> ReadRecords(int afterVersion, int maxCount)
         {
             using (var conn = new SqlConnection(_connectionString))
             {
@@ -150,7 +150,7 @@ namespace Sample.StorageImplementations.MsSql
                         {
                             var data = (byte[])reader["Data"];
                             var name = (string)reader["Name"];
-                            yield return new AppendRecord(name, data);
+                            yield return new DataWithName(name, data);
                         }
                     }
                 }

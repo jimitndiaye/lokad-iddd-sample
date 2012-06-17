@@ -13,7 +13,17 @@ namespace Sample
 {
     public interface IEventStore
     {
-        EventStream LoadEventStream(IIdentity id, int skip = 0, int take = int.MaxValue);
+        EventStream LoadEventStream(IIdentity id);
+        EventStream LoadEventStream(IIdentity id, int skipEvents, int maxCount);
+        /// <summary>
+        /// Appends events to server stream for the provided identity.
+        /// </summary>
+        /// <param name="id">identity to append to.</param>
+        /// <param name="expectedVersion">The expected version.</param>
+        /// <param name="events">The events to append.</param>
+        /// <exception cref="OptimisticConcurrencyException">when new events were added to server
+        /// since <paramref name="expectedVersion"/>
+        /// </exception>
         void AppendToStream(IIdentity id, int expectedVersion, ICollection<IEvent> events);
     }
 

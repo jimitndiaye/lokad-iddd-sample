@@ -22,8 +22,8 @@ namespace Sample.StorageImplementations.Azure
         readonly CloudBlobContainer _container;
 
         // Caches
-        readonly ConcurrentDictionary<string, TapeRecord[]> _items = new ConcurrentDictionary<string, TapeRecord[]>();
-        AppendRecord[] _all = new AppendRecord[0];
+        readonly ConcurrentDictionary<string, DataWithVersion[]> _items = new ConcurrentDictionary<string, DataWithVersion[]>();
+        DataWithName[] _all = new DataWithName[0];
 
         /// <summary>
         /// Used to synchronize access between multiple threads within one process
@@ -54,25 +54,25 @@ namespace Sample.StorageImplementations.Azure
                 Close();
         }
 
-        public void Append(string key, byte[] buffer, int serverVersion = -1)
+        public void Append(string name, byte[] data, int expectedVersion = -1)
         {
             // should be locked
             try
             {
                 _rwLock.EnterWriteLock();
 
-                var list = _items.GetOrAdd(key, s => new TapeRecord[0]);
-                if (serverVersion >= 0)
+                var list = _items.GetOrAdd(name, s => new DataWithVersion[0]);
+                if (expectedVersion >= 0)
                 {
-                    if (list.Length != serverVersion)
-                        throw new AppendOnlyStoreConcurrencyException(serverVersion, list.Length, key);
+                    if (list.Length != expectedVersion)
+                        throw new AppendOnlyStoreConcurrencyException(expectedVersion, list.Length, name);
                 }
 
                 EnsureWriterExists(_all.Length);
                 int commit = list.Length + 1;
 
-                Persist(key, buffer, commit);
-                AddToCaches(key, buffer, commit);
+                Persist(name, data, commit);
+                AddToCaches(name, data, commit);
             }
             catch
             {
@@ -84,14 +84,14 @@ namespace Sample.StorageImplementations.Azure
             }
         }
 
-        public IEnumerable<TapeRecord> ReadRecords(string key, int afterVersion, int maxCount)
+        public IEnumerable<DataWithVersion> ReadRecords(string name, int afterVersion, int maxCount)
         {
             // no lock is needed, since we are polling immutable object.
-            TapeRecord[] list;
-            return _items.TryGetValue(key, out list) ? list : Enumerable.Empty<TapeRecord>();
+            DataWithVersion[] list;
+            return _items.TryGetValue(name, out list) ? list : Enumerable.Empty<DataWithVersion>();
         }
 
-        public IEnumerable<AppendRecord> ReadRecords(int afterVersion, int maxCount)
+        public IEnumerable<DataWithName> ReadRecords(int afterVersion, int maxCount)
         {
             // collection is immutable so we don't care about locks
             return _all.Skip((int)afterVersion).Take(maxCount);
@@ -178,8 +178,8 @@ namespace Sample.StorageImplementations.Azure
 
         void AddToCaches(string key, byte[] buffer, int commit)
         {
-            var record = new TapeRecord(commit, buffer);
-            _all = AddToNewArray(_all, new AppendRecord(key, buffer));
+            var record = new DataWithVersion(commit, buffer);
+            _all = AddToNewArray(_all, new DataWithName(key, buffer));
             _items.AddOrUpdate(key, s => new[] { record }, (s, records) => AddToNewArray(records, record));
         }
 
