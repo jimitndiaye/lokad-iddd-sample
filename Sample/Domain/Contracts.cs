@@ -74,6 +74,11 @@ namespace Sample.Domain
             left.CheckCurrency(right.Currency, "-");
             return new CurrencyAmount(left.Amount - right.Amount, left.Currency);
         }
+        public static CurrencyAmount operator -(CurrencyAmount right)
+        {
+            
+            return new CurrencyAmount(- right.Amount, right.Currency);
+        }
 
         void CheckCurrency(Currency type, string operation)
         {

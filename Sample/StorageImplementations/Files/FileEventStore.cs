@@ -106,8 +106,8 @@ namespace Sample.StorageImplementations.Files
             result = null;
             try
             {
-                var version = binary.ReadInt32();
                 var name = binary.ReadString();
+                var version = binary.ReadInt32();
                 var len = binary.ReadInt32();
                 var bytes = binary.ReadBytes(len);
                 var sha = binary.ReadBytes(20); // SHA1. TODO: verify data
@@ -187,8 +187,8 @@ namespace Sample.StorageImplementations.Files
                     using (var crypto = new CryptoStream(memory, sha1, CryptoStreamMode.Write))
                     using (var binary = new BinaryWriter(crypto, Encoding.UTF8))
                     {
-                        binary.Write(commit);
                         binary.Write(key);
+                        binary.Write(commit);
                         binary.Write(buffer.Length);
                         binary.Write(buffer);
                     }
