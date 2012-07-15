@@ -19,7 +19,14 @@ Multiple persistence options are provided:
 
 ### Usage
 
-Start by [checking out project with git](https://github.com/Lokad/lokad-iddd-sample) or [downloading ZIP](https://github.com/Lokad/lokad-iddd-sample/zipball/master)
+Start by [downloading sources](https://github.com/Lokad/lokad-iddd-sample/zipball/master) (ZIP, Visual Studio) 
+or by cloning a [git repository](https://github.com/Lokad/lokad-iddd-sample):
+
+```
+$ git clone git://github.com/Lokad/lokad-iddd-sample.git
+```
+
+
 Then, open solution in Visual Studio (ModoDevelop might also work) and
 run the project. The project is auto-configured to use file storage by default,
 and cleans it on every start.
