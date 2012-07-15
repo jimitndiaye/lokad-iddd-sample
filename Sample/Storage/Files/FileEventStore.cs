@@ -8,11 +8,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
-namespace Sample.StorageImplementations.Files
+namespace Sample.Storage.Files
 {
     /// <summary>
-    /// Simple embedded append-only store that uses Riak.Bitcask model
-    /// for keeping records
+    /// <para>Simple embedded append-only store that uses Riak.Bitcask model
+    /// for keeping records</para>
+    /// <para>This code is frozen to match IDDD book. For latest practices see Lokad.CQRS Project</para>
     /// </summary>
     public class FileAppendOnlyStore : IAppendOnlyStore
     {

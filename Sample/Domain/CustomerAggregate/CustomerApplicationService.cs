@@ -1,4 +1,5 @@
 using System;
+using Sample.Storage;
 
 namespace Sample.Domain
 {

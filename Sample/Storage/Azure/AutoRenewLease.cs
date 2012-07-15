@@ -5,7 +5,7 @@ using System.Threading;
 using Microsoft.WindowsAzure.StorageClient;
 using Microsoft.WindowsAzure.StorageClient.Protocol;
 
-namespace Sample.StorageImplementations.Azure
+namespace Sample.Storage.Azure
 {
     /// <summary>
     /// Helper class that keeps renewing ownership lease (lock) of a specific blob,

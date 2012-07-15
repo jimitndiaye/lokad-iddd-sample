@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using Sample.Domain;
 using Sample.Storage;
-using Sample.StorageImplementations.Files;
-using Sample.StorageImplementations.MsSql;
+using Sample.Storage.Files;
+using Sample.Storage.MsSql;
 
 namespace Sample
 {

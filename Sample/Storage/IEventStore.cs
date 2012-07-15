@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace Sample
+namespace Sample.Storage
 {
     public interface IEventStore
     {
@@ -19,7 +19,7 @@ namespace Sample
         /// Appends events to server stream for the provided identity.
         /// </summary>
         /// <param name="id">identity to append to.</param>
-        /// <param name="expectedVersion">The expected version.</param>
+        /// <param name="expectedVersion">The expected version (specify -1 to append anyway).</param>
         /// <param name="events">The events to append.</param>
         /// <exception cref="OptimisticConcurrencyException">when new events were added to server
         /// since <paramref name="expectedVersion"/>

@@ -9,14 +9,14 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using Microsoft.WindowsAzure.StorageClient;
-using Sample.Storage;
 
-namespace Sample.StorageImplementations.Azure
+namespace Sample.Storage.Azure
 {
     /// <summary>
     /// <para>This is embedded append-only store implemented on top of cloud page blobs 
     /// (for persisting data with one HTTP call).</para>
     /// <para>This store ensures that only one writer exists and writes to a given event store</para>
+    /// <para>This code is frozen to match IDDD book. For latest practices see Lokad.CQRS Project</para>
     /// </summary>
     public sealed class BlobAppendOnlyStore : IAppendOnlyStore
     {

@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 
-namespace Sample.StorageImplementations.mySql
+namespace Sample.Storage.MySql
 {
     /// <summary>
-    /// This is a SQL event storage simplified to demonstrate essential principles.
+    /// <para>This is a SQL event storage for MySQL, simplified to demonstrate 
+    /// essential principles.
     /// If you need more robust SQL implementation, check out Event Store of
-    /// Jonathan Oliver
+    /// Jonathan Oliver</para>
+    /// <para>This code is frozen to match IDDD book. For latest practices see Lokad.CQRS Project</para>
     /// </summary>
     public sealed class MySqlEventStore : IAppendOnlyStore
     {

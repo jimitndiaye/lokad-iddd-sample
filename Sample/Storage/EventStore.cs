@@ -6,6 +6,11 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Sample.Storage
 {
+    /// <summary>
+    /// Actual implementation of <see cref="IEventStore"/>, which deals with
+    /// serialization and naming in order to provide bridge between event-centric
+    /// domain code and byte-based append-only persistence
+    /// </summary>
     public class EventStore : IEventStore
     {
         readonly BinaryFormatter _formatter = new BinaryFormatter();

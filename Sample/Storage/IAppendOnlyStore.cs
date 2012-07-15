@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace Sample
+namespace Sample.Storage
 {
     public interface IAppendOnlyStore : IDisposable
     {
