@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `ES_Events` (
             
         }
 
-        public void Append(string name, byte[] data, int expectedVersion)
+        public void Append(string name, byte[] data, long expectedVersion)
         {
             using (var conn = new MySqlConnection(_connectionString))
             {
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `ES_Events` (
             }
         }
 
-        public IEnumerable<DataWithVersion> ReadRecords(string name, int afterVersion, int maxCount)
+        public IEnumerable<DataWithVersion> ReadRecords(string name, long afterVersion, int maxCount)
         {
             using (var conn = new MySqlConnection(_connectionString))
             {
@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `ES_Events` (
             }
         }
 
-        public IEnumerable<DataWithName> ReadRecords(int afterVersion, int maxCount)
+        public IEnumerable<DataWithName> ReadRecords(long afterVersion, int maxCount)
         {
             using (var conn = new MySqlConnection(_connectionString))
             {

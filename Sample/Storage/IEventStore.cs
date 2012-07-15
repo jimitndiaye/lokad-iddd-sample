@@ -14,7 +14,7 @@ namespace Sample
     public interface IEventStore
     {
         EventStream LoadEventStream(IIdentity id);
-        EventStream LoadEventStream(IIdentity id, int skipEvents, int maxCount);
+        EventStream LoadEventStream(IIdentity id, long skipEvents, int maxCount);
         /// <summary>
         /// Appends events to server stream for the provided identity.
         /// </summary>
@@ -24,13 +24,13 @@ namespace Sample
         /// <exception cref="OptimisticConcurrencyException">when new events were added to server
         /// since <paramref name="expectedVersion"/>
         /// </exception>
-        void AppendToStream(IIdentity id, int expectedVersion, ICollection<IEvent> events);
+        void AppendToStream(IIdentity id, long expectedVersion, ICollection<IEvent> events);
     }
 
     public class EventStream
     {
         // version of the event stream returned
-        public int Version;
+        public long Version;
         // all events in the stream
         public List<IEvent> Events = new List<IEvent>();
     }
@@ -41,12 +41,12 @@ namespace Sample
     [Serializable]
     public class OptimisticConcurrencyException : Exception
     {
-        public int ActualVersion { get; private set; }
-        public int ExpectedVersion { get; private set; }
+        public long ActualVersion { get; private set; }
+        public long ExpectedVersion { get; private set; }
         public IIdentity Id { get; private set; }
         public IList<IEvent> ActualEvents { get; private set; }
 
-        OptimisticConcurrencyException(string message, int actualVersion, int expectedVersion, IIdentity id,
+        OptimisticConcurrencyException(string message, long actualVersion, long expectedVersion, IIdentity id,
             IList<IEvent> serverEvents)
             : base(message)
         {
@@ -56,7 +56,7 @@ namespace Sample
             ActualEvents = serverEvents;
         }
 
-        public static OptimisticConcurrencyException Create(int actual, int expected, IIdentity id,
+        public static OptimisticConcurrencyException Create(long actual, long expected, IIdentity id,
             IList<IEvent> serverEvents)
         {
             var message = string.Format("Expected v{0} but found v{1} in stream '{2}'", expected, actual, id);

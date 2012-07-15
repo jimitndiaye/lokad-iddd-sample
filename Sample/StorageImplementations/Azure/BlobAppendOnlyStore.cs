@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -28,7 +29,7 @@ namespace Sample.StorageImplementations.Azure
         /// <summary>
         /// Used to synchronize access between multiple threads within one process
         /// </summary>
-        readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
+        readonly ReaderWriterLockSlim _cacheLock = new ReaderWriterLockSlim();
 
 
         bool _closed;
@@ -54,44 +55,61 @@ namespace Sample.StorageImplementations.Azure
                 Close();
         }
 
-        public void Append(string name, byte[] data, int expectedVersion = -1)
+        public void InitializeWriter()
         {
+            CreateIfNotExists(_container, TimeSpan.FromSeconds(60));
+            // grab the ownership
+            var blobReference = _container.GetBlobReference("lock");
+            _lock = AutoRenewLease.GetOrThrow(blobReference);
+
+            LoadCaches();
+        }
+        public void InitializeReader()
+        {
+            CreateIfNotExists(_container, TimeSpan.FromSeconds(60));
+            LoadCaches();
+        }
+
+        public void Append(string streamName, byte[] data, long expectedStreamVersion = -1)
+        {
+
             // should be locked
             try
             {
-                _rwLock.EnterWriteLock();
+                _cacheLock.EnterWriteLock();
 
-                var list = _items.GetOrAdd(name, s => new DataWithVersion[0]);
-                if (expectedVersion >= 0)
+                var list = _items.GetOrAdd(streamName, s => new DataWithVersion[0]);
+                if (expectedStreamVersion >= 0)
                 {
-                    if (list.Length != expectedVersion)
-                        throw new AppendOnlyStoreConcurrencyException(expectedVersion, list.Length, name);
+                    if (list.Length != expectedStreamVersion)
+                        throw new AppendOnlyStoreConcurrencyException(expectedStreamVersion, list.Length, streamName);
                 }
 
                 EnsureWriterExists(_all.Length);
-                int commit = list.Length + 1;
+                long commit = list.Length + 1;
 
-                Persist(name, data, commit);
-                AddToCaches(name, data, commit);
+                Persist(streamName, data, commit);
+                AddToCaches(streamName, data, commit);
             }
             catch
             {
                 Close();
+                throw;
             }
             finally
             {
-                _rwLock.ExitWriteLock();
+                _cacheLock.ExitWriteLock();
             }
         }
 
-        public IEnumerable<DataWithVersion> ReadRecords(string name, int afterVersion, int maxCount)
+        public IEnumerable<DataWithVersion> ReadRecords(string streamName, long afterVersion, int maxCount)
         {
             // no lock is needed, since we are polling immutable object.
             DataWithVersion[] list;
-            return _items.TryGetValue(name, out list) ? list : Enumerable.Empty<DataWithVersion>();
+            return _items.TryGetValue(streamName, out list) ? list : Enumerable.Empty<DataWithVersion>();
         }
 
-        public IEnumerable<DataWithName> ReadRecords(int afterVersion, int maxCount)
+        public IEnumerable<DataWithName> ReadRecords(long afterVersion, int maxCount)
         {
             // collection is immutable so we don't care about locks
             return _all.Skip((int)afterVersion).Take(maxCount);
@@ -102,7 +120,13 @@ namespace Sample.StorageImplementations.Azure
             using (_lock)
             {
                 _closed = true;
+
+                if (_currentWriter == null)
+                    return;
+
+                var tmp = _currentWriter;
                 _currentWriter = null;
+                tmp.Dispose();
             }
         }
 
@@ -133,15 +157,23 @@ namespace Sample.StorageImplementations.Azure
         static bool TryReadRecord(BinaryReader binary, out Record result)
         {
             result = null;
+
             try
             {
-                var version = binary.ReadInt32();
+                var version = binary.ReadInt64();
                 var name = binary.ReadString();
                 var len = binary.ReadInt32();
                 var bytes = binary.ReadBytes(len);
-                var sha = binary.ReadBytes(20); // SHA1. TODO: verify data
-                if (sha.All(s => s == 0))
-                    throw new InvalidOperationException("definitely failed");
+
+                var sha1 = binary.ReadBytes(20);
+                if (sha1.All(s => s == 0))
+                    throw new InvalidOperationException("definitely failed (zero hash)");
+
+                byte[] actualSha1;
+                PersistRecord(name, bytes, version, out actualSha1);
+
+                if (!sha1.SequenceEqual(actualSha1))
+                    throw new InvalidOperationException("hash mismatch");
 
                 result = new Record(bytes, name, version);
                 return true;
@@ -163,7 +195,7 @@ namespace Sample.StorageImplementations.Azure
         {
             try
             {
-                _rwLock.EnterWriteLock();
+                _cacheLock.EnterWriteLock();
 
                 foreach (var record in EnumerateHistory())
                 {
@@ -172,11 +204,11 @@ namespace Sample.StorageImplementations.Azure
             }
             finally
             {
-                _rwLock.ExitWriteLock();
+                _cacheLock.ExitWriteLock();
             }
         }
 
-        void AddToCaches(string key, byte[] buffer, int commit)
+        void AddToCaches(string key, byte[] buffer, long commit)
         {
             var record = new DataWithVersion(commit, buffer);
             _all = AddToNewArray(_all, new DataWithName(key, buffer));
@@ -191,44 +223,40 @@ namespace Sample.StorageImplementations.Azure
             return copy;
         }
 
-        void Persist(string key, byte[] buffer, int commit)
+        void Persist(string key, byte[] buffer, long commit)
         {
-            using (var sha1 = new SHA1Managed())
+            byte[] hash;
+            var bytes = PersistRecord(key, buffer, commit, out hash);
+
+            if (!_currentWriter.Fits(bytes.Length + hash.Length))
             {
-                byte[] bytes;
-                // version, ksz, vsz, key, value, sha1
-                using (var memory = new MemoryStream())
-                {
-                    using (var crypto = new CryptoStream(memory, sha1, CryptoStreamMode.Write))
-                    using (var binary = new BinaryWriter(crypto, Encoding.UTF8))
-                    {
-                        binary.Write(commit);
-                        binary.Write(key);
-                        binary.Write(buffer.Length);
-                        binary.Write(buffer);
-                    }
-                    bytes = memory.ToArray();
-                }
-
-                if (!_currentWriter.Fits(bytes.Length + sha1.Hash.Length))
-                {
-                    CloseWriter();
-                    EnsureWriterExists(_all.Length);
-                }
-
-                _currentWriter.Write(bytes);
-                _currentWriter.Write(sha1.Hash);
-                _currentWriter.Flush();
+                CloseWriter();
+                EnsureWriterExists(_all.Length);
             }
+
+            _currentWriter.Write(bytes);
+            _currentWriter.Write(hash);
+            _currentWriter.Flush();
         }
 
-        public void Initialize()
+        static byte[] PersistRecord(string key, byte[] buffer, long commit, out byte[] hash)
         {
-            _container.CreateIfNotExist();
+            using (var sha1 = new SHA1Managed())
+            using (var memory = new MemoryStream())
+            {
+                using (var crypto = new CryptoStream(memory, sha1, CryptoStreamMode.Write))
+                using (var binary = new BinaryWriter(crypto, Encoding.UTF8))
+                {
+                    // version, ksz, vsz, key, value, sha1
+                    binary.Write(commit);
+                    binary.Write(key);
+                    binary.Write(buffer.Length);
+                    binary.Write(buffer);
+                }
 
-            // grab the ownership
-            _lock = AutoRenewLease.GetOrThrow(_container.GetBlobReference("lock"));
-            LoadCaches();
+                hash = sha1.Hash;
+                return memory.ToArray();
+            }
         }
 
         void CloseWriter()
@@ -239,6 +267,11 @@ namespace Sample.StorageImplementations.Azure
 
         void EnsureWriterExists(long version)
         {
+
+
+            if (_lock.Exception != null)
+                throw new InvalidOperationException("Can not renew lease", _lock.Exception);
+
             if (_currentWriter != null)
                 return;
 
@@ -249,13 +282,35 @@ namespace Sample.StorageImplementations.Azure
             _currentWriter = new AppendOnlyStream(512, (i, bytes) => blob.WritePages(bytes, i), 1024 * 512);
         }
 
+        static void CreateIfNotExists(CloudBlobContainer container, TimeSpan timeout)
+        {
+            var sw = Stopwatch.StartNew();
+            while (sw.Elapsed < timeout)
+            {
+                try
+                {
+                    container.CreateIfNotExist();
+                    return;
+                }
+                catch (StorageClientException e)
+                {
+                    // container is being deleted
+                    if (!(e.ErrorCode == StorageErrorCode.ResourceAlreadyExists && e.StatusCode == HttpStatusCode.Conflict))
+                        throw;
+                }
+                Thread.Sleep(500);
+            }
+
+            throw new TimeoutException(string.Format("Can not create container within {0} seconds.", timeout.TotalSeconds));
+        }
+
         sealed class Record
         {
             public readonly byte[] Bytes;
             public readonly string Name;
-            public readonly int Version;
+            public readonly long Version;
 
-            public Record(byte[] bytes, string name, int version)
+            public Record(byte[] bytes, string name, long version)
             {
                 Bytes = bytes;
                 Name = name;

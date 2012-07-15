@@ -33,7 +33,7 @@ namespace Sample.Storage
         }
 
         readonly IAppendOnlyStore _appendOnlyStore;
-        public EventStream LoadEventStream(IIdentity id, int skip, int take)
+        public EventStream LoadEventStream(IIdentity id, long skip, int take)
         {
             var name = IdentityToString(id);
             var records = _appendOnlyStore.ReadRecords(name, skip, take).ToList();
@@ -58,7 +58,7 @@ namespace Sample.Storage
             return LoadEventStream(id, 0, int.MaxValue);
         }
 
-        public void AppendToStream(IIdentity id, int originalVersion, ICollection<IEvent> events)
+        public void AppendToStream(IIdentity id, long originalVersion, ICollection<IEvent> events)
         {
             if (events.Count == 0)
                 return;
@@ -73,7 +73,7 @@ namespace Sample.Storage
                 // load server events
                 var server = LoadEventStream(id, 0, int.MaxValue);
                 // throw a real problem
-                throw OptimisticConcurrencyException.Create(server.Version, e.ExpectedVersion, id, server.Events);
+                throw OptimisticConcurrencyException.Create(server.Version, e.ExpectedStreamVersion, id, server.Events);
             }
 
             // technically there should be parallel process that queries new changes from 

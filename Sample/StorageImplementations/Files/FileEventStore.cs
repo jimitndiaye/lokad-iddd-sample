@@ -20,9 +20,9 @@ namespace Sample.StorageImplementations.Files
         {
             public readonly byte[] Bytes;
             public readonly string Name;
-            public readonly int Version;
+            public readonly long Version;
 
-            public Record(byte[] bytes, string name, int version)
+            public Record(byte[] bytes, string name, long version)
             {
                 Bytes = bytes;
                 Name = name;
@@ -58,11 +58,12 @@ namespace Sample.StorageImplementations.Files
             LoadCaches();
         }
 
-        void LoadCaches()
+        public void LoadCaches()
         {
             try
             {
                 _thread.EnterWriteLock();
+                _all = new DataWithName[0];
                 foreach (var record in EnumerateHistory())
                 {
                     AddToCaches(record.Name, record.Bytes, record.Version);
@@ -106,8 +107,8 @@ namespace Sample.StorageImplementations.Files
             result = null;
             try
             {
+                var version = binary.ReadInt64();
                 var name = binary.ReadString();
-                var version = binary.ReadInt32();
                 var len = binary.ReadInt32();
                 var bytes = binary.ReadBytes(len);
                 var sha = binary.ReadBytes(20); // SHA1. TODO: verify data
@@ -137,35 +138,30 @@ namespace Sample.StorageImplementations.Files
                 Close();
         }
 
-        public FileAppendOnlyStore(DirectoryInfo info)
-        {
-            _info = info;
-        }
-
         public FileAppendOnlyStore(string path)
         {
             _info = new DirectoryInfo(path);
         }
 
-        public void Append(string name, byte[] data, int expectedVersion = -1)
+        public void Append(string streamName, byte[] data, long expectedStreamVersion = -1)
         {
             // should be locked
             try
             {
                 _thread.EnterWriteLock();
 
-                var list = _items.GetOrAdd(name, s => new DataWithVersion[0]);
-                if (expectedVersion >= 0)
+                var list = _items.GetOrAdd(streamName, s => new DataWithVersion[0]);
+                if (expectedStreamVersion >= 0)
                 {
-                    if (list.Length != expectedVersion)
-                        throw new AppendOnlyStoreConcurrencyException(expectedVersion, list.Length, name);
+                    if (list.Length != expectedStreamVersion)
+                        throw new AppendOnlyStoreConcurrencyException(expectedStreamVersion, list.Length, streamName);
                 }
 
                 EnsureWriterExists(_all.Length);
-                int commit = list.Length + 1;
+                long commit = list.Length + 1;
 
-                PersistInFile(name, data, commit);
-                AddToCaches(name, data, commit);
+                PersistInFile(streamName, data, commit);
+                AddToCaches(streamName, data, commit);
             }
             catch
             {
@@ -177,7 +173,7 @@ namespace Sample.StorageImplementations.Files
             }
         }
 
-        void PersistInFile(string key, byte[] buffer, int commit)
+        void PersistInFile(string key, byte[] buffer, long commit)
         {
             using (var sha1 = new SHA1Managed())
             {
@@ -187,8 +183,8 @@ namespace Sample.StorageImplementations.Files
                     using (var crypto = new CryptoStream(memory, sha1, CryptoStreamMode.Write))
                     using (var binary = new BinaryWriter(crypto, Encoding.UTF8))
                     {
-                        binary.Write(key);
                         binary.Write(commit);
+                        binary.Write(key);
                         binary.Write(buffer.Length);
                         binary.Write(buffer);
                     }
@@ -211,7 +207,7 @@ namespace Sample.StorageImplementations.Files
             _currentWriter = File.OpenWrite(Path.Combine(_info.FullName, fileName));
         }
 
-        void AddToCaches(string key, byte[] buffer, int commit)
+        void AddToCaches(string key, byte[] buffer, long commit)
         {
             var record = new DataWithVersion(commit, buffer);
             _all = ImmutableAdd(_all, new DataWithName(key, buffer));
@@ -226,14 +222,14 @@ namespace Sample.StorageImplementations.Files
             return copy;
         }
 
-        public IEnumerable<DataWithVersion> ReadRecords(string name, int afterVersion, int maxCount)
+        public IEnumerable<DataWithVersion> ReadRecords(string streamName, long afterVersion, int maxCount)
         {
             // no lock is needed.
             DataWithVersion[] list;
-            return _items.TryGetValue(name, out list) ? list : Enumerable.Empty<DataWithVersion>();
+            return _items.TryGetValue(streamName, out list) ? list : Enumerable.Empty<DataWithVersion>();
         }
 
-        public IEnumerable<DataWithName> ReadRecords(int afterVersion, int maxCount)
+        public IEnumerable<DataWithName> ReadRecords(long afterVersion, int maxCount)
         {
             // collection is immutable so we don't care about locks
             return _all.Skip((int)afterVersion).Take(maxCount);
@@ -248,6 +244,11 @@ namespace Sample.StorageImplementations.Files
             {
                 _closed = true;
             }
+        }
+
+        public long GetCurrentVersion()
+        {
+            return _all.Length;
         }
     }
 }

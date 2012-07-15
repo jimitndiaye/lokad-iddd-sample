@@ -67,8 +67,8 @@ namespace Sample
     [Serializable]
     public class AppendOnlyStoreConcurrencyException : Exception
     {
-        public int ExpectedStreamVersion { get; private set; }
-        public int ActualStreamVersion { get; private set; }
+        public long ExpectedStreamVersion { get; private set; }
+        public long ActualStreamVersion { get; private set; }
         public string StreamName { get; private set; }
 
         protected AppendOnlyStoreConcurrencyException(
@@ -76,7 +76,7 @@ namespace Sample
             StreamingContext context)
             : base(info, context) { }
 
-        public AppendOnlyStoreConcurrencyException(int expectedVersion, int actualVersion, string name)
+        public AppendOnlyStoreConcurrencyException(long expectedVersion, long actualVersion, string name)
             : base(
                 string.Format("Expected version {0} in stream '{1}' but got {2}", expectedVersion, name, actualVersion))
         {

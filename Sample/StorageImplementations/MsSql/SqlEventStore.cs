@@ -57,7 +57,7 @@ namespace Sample.StorageImplementations.MsSql
             
         }
 
-        public void Append(string name, byte[] data, int expectedVersion = -1)
+        public void Append(string name, byte[] data, long expectedVersion = -1)
         {
             
             using (var conn = new SqlConnection(_connectionString))
@@ -99,7 +99,7 @@ namespace Sample.StorageImplementations.MsSql
             }
         }
 
-        public IEnumerable<DataWithVersion> ReadRecords(string name, int afterVersion, int maxCount)
+        public IEnumerable<DataWithVersion> ReadRecords(string name, long afterVersion, int maxCount)
         {
             using (var conn = new SqlConnection(_connectionString))
             {
@@ -128,7 +128,7 @@ namespace Sample.StorageImplementations.MsSql
             }
         }
 
-        public IEnumerable<DataWithName> ReadRecords(int afterVersion, int maxCount)
+        public IEnumerable<DataWithName> ReadRecords(long afterVersion, int maxCount)
         {
             using (var conn = new SqlConnection(_connectionString))
             {
@@ -142,7 +142,6 @@ namespace Sample.StorageImplementations.MsSql
                     
                     cmd.Parameters.AddWithValue("@take", maxCount);
                     cmd.Parameters.AddWithValue("@skip", afterVersion);
-
 
                     using (var reader = cmd.ExecuteReader())
                     {

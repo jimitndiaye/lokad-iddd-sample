@@ -15,6 +15,7 @@ namespace Sample.Storage
         MemoryStream _pending;
 
         int _bytesWritten;
+        int _bytesPending;
         int _fullPagesFlushed;
 
         public AppendOnlyStream(int pageSizeInBytes, AppendWriterDelegate writer, int maxByteCount)
@@ -34,11 +35,12 @@ namespace Sample.Storage
         {
             _pending.Write(buffer, 0, buffer.Length);
             _bytesWritten += buffer.Length;
+            _bytesPending += buffer.Length;
         }
 
         public void Flush()
         {
-            if (_pending.Length == 0)
+            if (_bytesPending == 0)
                 return;
 
             var size = (int)_pending.Length;
@@ -67,10 +69,12 @@ namespace Sample.Storage
             _pending = newStream;
 
             _fullPagesFlushed += fullPagesFlushed;
+            _bytesPending = 0;
         }
 
         public void Dispose()
         {
+            Flush();
             _pending.Dispose();
         }
     }
