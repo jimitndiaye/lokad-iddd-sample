@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Sample.Domain;
 
-namespace Sample.Domain
+namespace Sample.Projections
 {
     /// <summary>
     /// NB: this class is currently not wired to the infrastructure.

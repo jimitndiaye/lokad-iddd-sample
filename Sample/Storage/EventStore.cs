@@ -83,7 +83,7 @@ namespace Sample.Storage
             Console.ForegroundColor = ConsoleColor.DarkGreen;
             foreach (var @event in events)
             {
-                Console.WriteLine("  {0}r{1} Event: {2}", id,originalVersion, @event);
+                Console.WriteLine("  {0} r{1} Event: {2}", id,originalVersion, @event);
             }
             Console.ForegroundColor = ConsoleColor.DarkGray;
         }

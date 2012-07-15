@@ -1,7 +1,6 @@
 DRAFT! sample code for IDDD Book 
 ================================
 
-
 This is .NET Sample Project to accompany Event Sourcing materials 
 from IDDD Book by [Vaughn Vernon](http://vaughnvernon.co/).
 
@@ -27,14 +26,16 @@ and wipes it on every start.
 You should see something like:
 
 ```
-Create customer-12 named 'Lokad' with Eur
-  customer-12r0: Customer Lokad created with Eur
-Rename customer-12 to 'Lokad SAS'
-  customer-12r1: Customer renamed from 'Lokad' to 'Lokad SAS'
-Add 15 EUR - 'Cash'
-  customer-12r2: Added 'Cash' 15 EUR | Tx 1 => 15 EUR
-Charge 20 EUR - 'Forecasting'
-  customer-12r3: Charged 'Forecasting' 20 EUR | Tx 2 => -5 EUR
+Command: Create customer-12 named 'Lokad' with Eur
+  customer-12 r0 Event: Customer Lokad created with Eur
+  customer-12 r0 Event: Added 'Welcome bonus' 15 EUR | Tx 1 => 15 EUR
+  Completed in 145 ms
+Command: Rename customer-12 to 'Lokad SAS'
+  customer-12 r1 Event: Customer renamed from 'Lokad' to 'Lokad SAS'
+  Completed in 27 ms
+Command: Charge 20 EUR - 'Forecasting'
+  customer-12 r2 Event: Charged 'Forecasting' 20 EUR | Tx 2 => -5 EUR
+  Completed in 16 ms
 ```
 
 Then, you can dive into the code or try plugging in other types of stores.
@@ -46,7 +47,8 @@ automatically.
 If you want more details, here's what you can do next:
 
 * Check out the [Domain Driven Design community](http://dddcommunity.org/)
-* Dive into [Lokad.CQRS Sample Project](http://lokad.github.com/lokad-cqrs/) (much more detailed version of this sample)
+* Dive into [Lokad.CQRS Sample Project](http://lokad.github.com/lokad-cqrs/) (much more detailed and practical version of this sample)
+* Check out [CQRS/DDD Pocket Guide](http://cqrsguide.com/case-studies) and [case studies](http://cqrsguide.com/case-studies)
 * Follow [@VaughnVernon](https://twitter.com/#!/VaughnVernon).
 * Follow [@abdullin](https://twitter.com/#!/abdullin).
 
@@ -55,4 +57,4 @@ If you have any questions, please feel free to ask contributors.
 ### Authors and Contributors
 
 * [Vaughn Vernon](http://vaughnvernon.co/), Book author and reviewer
-* [Rinat Abdullin](http://abdullin.com), Tech Leader at [Lokad](http://www.lokad.com/), Big Data Analytics for Retail.
+* [Rinat Abdullin](http://abdullin.com), A+ES text and sample project. Tech Leader at [Lokad](http://www.lokad.com/), Big Data Analytics for Retail.

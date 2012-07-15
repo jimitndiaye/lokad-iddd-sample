@@ -49,7 +49,8 @@ namespace Sample
             if (Directory.Exists(combine))
             {
                 Console.WriteLine();
-                Console.WriteLine("Wiping even store for demo purposes");
+                Console.WriteLine("Wiping file even store for demo purposes.");
+                Console.WriteLine("You can switch to Azure or SQL event stores by modifying Program.cs");
                 Console.WriteLine();
                 Directory.Delete(combine, true);
             }

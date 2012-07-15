@@ -1,6 +1,6 @@
 using System;
 
-namespace Sample
+namespace Sample.Projections
 {
     public interface IDocumentWriter<in TKey, TEntity>
     {
