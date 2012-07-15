@@ -38,9 +38,10 @@ Command: Charge 20 EUR - 'Forecasting'
   Completed in 16 ms
 ```
 
-Then, you can dive into the code or try plugging in other types of stores.
-Each store requires connection string and will auto-create all required resources
-automatically.
+Then, you can dive into the code by starting with `Domain` folder in this solution.
+
+You can also try plugging in other types of stores. Each store requires connection string 
+and will auto-create all required resources automatically.
 
 ### Want More?
 

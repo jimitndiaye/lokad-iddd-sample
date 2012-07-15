@@ -59,11 +59,11 @@
     <Compile Include="LoggingWrapper.cs" />
     <Compile Include="Storage\AppendOnlyStream.cs" />
     <Compile Include="Storage\EventStore.cs" />
-    <Compile Include="StorageImplementations\Azure\AutoRenewLease.cs" />
-    <Compile Include="StorageImplementations\Azure\BlobAppendOnlyStore.cs" />
-    <Compile Include="StorageImplementations\Files\FileEventStore.cs" />
-    <Compile Include="StorageImplementations\MsSql\SqlEventStore.cs" />
-    <Compile Include="StorageImplementations\mySql\MySqlEventStore.cs" />
+    <Compile Include="Storage\Azure\AutoRenewLease.cs" />
+    <Compile Include="Storage\Azure\BlobAppendOnlyStore.cs" />
+    <Compile Include="Storage\Files\FileEventStore.cs" />
+    <Compile Include="Storage\MsSql\SqlEventStore.cs" />
+    <Compile Include="Storage\MySql\MySqlEventStore.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
@@ -77,7 +77,7 @@
     </None>
     <None Include="Domain\ReadMe.md" />
     <None Include="Projections\ReadMe.md" />
-    <None Include="StorageImplementations\ReadMe.md" />
+    <None Include="Storage\ReadMe.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
